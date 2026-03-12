@@ -1,0 +1,710 @@
+/* ============================================
+   GX Text Frontend Styles
+   by Genex Marketing Agency Ltd
+   ============================================ */
+
+/* Reset for widget scope */
+.gx-text-floating,
+.gx-text-floating * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: var(--gx-font, system-ui, -apple-system, sans-serif);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Floating Container ─────────────────── */
+.gx-text-floating {
+    position: fixed;
+    z-index: var(--gx-z-index, 9999);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+/* ─── Floating Button ────────────────────── */
+.gx-text-btn {
+    width: var(--gx-btn-size, 60px);
+    height: var(--gx-btn-size, 60px);
+    border-radius: var(--gx-btn-radius, 50%);
+    background: var(--gx-btn-color, #25D366);
+    color: var(--gx-btn-text, #fff);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    outline: none;
+}
+
+.gx-text-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25), 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.gx-text-btn:active {
+    transform: scale(0.95);
+}
+
+/* Button ripple effect */
+.gx-text-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.gx-text-btn:hover::after {
+    opacity: 1;
+}
+
+.gx-text-btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s, opacity 0.3s;
+}
+
+.gx-text-btn-brand {
+    width: var(--gx-btn-graphic-size, 28px);
+    height: var(--gx-btn-graphic-size, 28px);
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.16);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.gx-text-btn-brand img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.gx-text-btn-label {
+    font-size: 0;
+    opacity: 0;
+    max-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.gx-text-btn-label.gx-text-only {
+    font-size: 14px;
+    opacity: 1;
+    max-width: 200px;
+}
+
+.gx-text-btn.is-text-only {
+    width: auto;
+    min-width: var(--gx-btn-size, 60px);
+    padding: 0 20px;
+}
+
+/* Show label on hover (non-text-only) */
+.gx-text-btn:hover .gx-text-btn-label:not(.gx-text-only) {
+    font-size: 13px;
+    opacity: 1;
+    max-width: 120px;
+    margin-left: 4px;
+}
+
+/* Expanded rounded button on hover */
+.gx-text-btn:hover {
+    border-radius: calc(var(--gx-btn-size, 60px) / 2);
+    padding: 0 20px;
+    width: auto;
+}
+
+/* Close icon hidden by default */
+.gx-text-btn-close {
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+/* When widget is open */
+.gx-text-floating.is-open .gx-text-btn-icon,
+.gx-text-floating.is-open .gx-text-btn-brand,
+.gx-text-floating.is-open .gx-text-btn-label {
+    display: none;
+}
+.gx-text-floating.is-open .gx-text-btn-close {
+    display: flex;
+}
+.gx-text-floating.is-open .gx-text-btn {
+    width: var(--gx-btn-size, 60px);
+    padding: 0;
+    border-radius: 50%;
+    background: #e74c3c;
+}
+.gx-text-floating.is-open .gx-text-btn:hover {
+    width: var(--gx-btn-size, 60px);
+}
+
+/* ─── Animations ─────────────────────────── */
+
+/* Pulse */
+@keyframes gx-pulse {
+    0% { box-shadow: 0 4px 16px rgba(0,0,0,0.2), 0 0 0 0 var(--gx-btn-color); }
+    70% { box-shadow: 0 4px 16px rgba(0,0,0,0.2), 0 0 0 16px transparent; }
+    100% { box-shadow: 0 4px 16px rgba(0,0,0,0.2), 0 0 0 0 transparent; }
+}
+.gx-anim-pulse:not(:hover) {
+    animation: gx-pulse 2s ease-in-out infinite;
+}
+
+/* Bounce */
+@keyframes gx-bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-12px); }
+    60% { transform: translateY(-6px); }
+}
+.gx-anim-bounce:not(:hover) {
+    animation: gx-bounce 2.5s ease infinite;
+}
+
+/* Shake */
+@keyframes gx-shake {
+    0%, 100% { transform: rotate(0deg); }
+    10% { transform: rotate(-8deg); }
+    20% { transform: rotate(8deg); }
+    30% { transform: rotate(-6deg); }
+    40% { transform: rotate(6deg); }
+    50% { transform: rotate(0deg); }
+}
+.gx-anim-shake:not(:hover) {
+    animation: gx-shake 3s ease-in-out infinite;
+}
+
+/* Glow */
+@keyframes gx-glow {
+    0%, 100% { box-shadow: 0 4px 16px rgba(0,0,0,0.2), 0 0 20px var(--gx-btn-color); }
+    50% { box-shadow: 0 4px 16px rgba(0,0,0,0.2), 0 0 40px var(--gx-btn-color), 0 0 60px var(--gx-btn-color); }
+}
+.gx-anim-glow:not(:hover) {
+    animation: gx-glow 2s ease-in-out infinite;
+}
+
+/* Stop animation when open */
+.gx-text-floating.is-open .gx-text-btn {
+    animation: none !important;
+}
+
+/* ─── Widget Panel ───────────────────────── */
+.gx-text-widget {
+    position: fixed;
+    width: 370px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 140px);
+    background: var(--gx-widget-bg, #fff);
+    border-radius: 16px;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    z-index: var(--gx-z-index, 9999);
+
+    /* Hidden by default */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.95);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+.gx-text-widget.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+/* ─── Widget Header ──────────────────────── */
+.gx-text-widget-header {
+    background: var(--gx-header-bg, #25D366);
+    color: var(--gx-header-text, #fff);
+    padding: 20px 20px 16px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+.gx-text-widget-header-content {
+    flex: 1;
+    min-width: 0;
+}
+.gx-text-widget-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+.gx-text-widget-copy {
+    min-width: 0;
+}
+.gx-text-widget-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: inherit;
+    line-height: 1.3;
+}
+.gx-text-widget-header p {
+    font-size: 13px;
+    opacity: 0.85;
+    margin: 0;
+    line-height: 1.4;
+    color: inherit;
+}
+.gx-text-widget-brand {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.18);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.16);
+}
+.gx-text-widget-brand img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.gx-text-widget-close {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: inherit;
+    transition: background 0.2s;
+    flex-shrink: 0;
+}
+.gx-text-widget-close:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+/* ─── Tabs ───────────────────────────────── */
+.gx-text-tabs {
+    display: flex;
+    border-bottom: 2px solid #f0f0f0;
+    background: var(--gx-widget-bg, #fff);
+}
+.gx-text-tab {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: #999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+    position: relative;
+    outline: none;
+}
+.gx-text-tab::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: transparent;
+    transition: background 0.2s;
+}
+.gx-text-tab.active {
+    color: var(--gx-header-bg, #25D366);
+}
+.gx-text-tab.active::after {
+    background: var(--gx-header-bg, #25D366);
+}
+.gx-text-tab:hover:not(.active) {
+    color: #666;
+}
+.gx-text-tab svg {
+    flex-shrink: 0;
+}
+.gx-text-tab-brand {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: rgba(37, 211, 102, 0.12);
+}
+.gx-text-tab-brand img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.gx-text-tab-label {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+}
+
+/* ─── Tab Content ────────────────────────── */
+.gx-text-tab-content {
+    display: none;
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+.gx-text-tab-content.active {
+    display: block;
+    animation: gx-fadeIn 0.3s ease;
+}
+
+@keyframes gx-fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Form Styles ────────────────────────── */
+.gx-text-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.gx-text-field {
+    position: relative;
+}
+
+.gx-text-field input,
+.gx-text-field textarea {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    border: 2px solid #e8e8e8;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #333;
+    background: #fafafa;
+    transition: all 0.2s;
+    outline: none;
+    resize: none;
+    font-family: inherit;
+}
+.gx-text-field textarea {
+    padding-left: 16px;
+    min-height: 80px;
+}
+.gx-text-field input:focus,
+.gx-text-field textarea:focus {
+    border-color: var(--gx-header-bg, #25D366);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+}
+.gx-text-field input::placeholder,
+.gx-text-field textarea::placeholder {
+    color: #aaa;
+}
+
+.gx-text-field-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+}
+
+/* Field validation */
+.gx-text-field input.gx-error,
+.gx-text-field textarea.gx-error {
+    border-color: #e74c3c;
+    background: #fff5f5;
+}
+.gx-text-field input.gx-error:focus,
+.gx-text-field textarea.gx-error:focus {
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+/* ─── Submit Button ──────────────────────── */
+.gx-text-submit {
+    width: 100%;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 10px;
+    background: var(--gx-header-bg, #25D366);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+}
+.gx-text-submit:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.gx-text-submit:active {
+    transform: translateY(0);
+}
+
+.gx-text-subscribe-btn {
+    background: var(--gx-subscribe-btn, #FF6B35) !important;
+}
+
+.gx-text-submit-loading {
+    display: none;
+}
+.gx-text-submit.is-loading .gx-text-submit-text,
+.gx-text-submit.is-loading .gx-send-icon {
+    display: none;
+}
+.gx-text-submit.is-loading .gx-text-submit-loading {
+    display: flex;
+}
+
+/* Spinner */
+@keyframes gx-spin {
+    to { transform: rotate(360deg); }
+}
+.gx-spinner {
+    animation: gx-spin 0.8s linear infinite;
+}
+
+/* ─── Success State ──────────────────────── */
+.gx-text-success {
+    text-align: center;
+    padding: 30px 20px;
+}
+.gx-text-success-icon {
+    margin-bottom: 12px;
+    animation: gx-scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes gx-scaleIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+.gx-text-success p {
+    font-size: 15px;
+    color: #333;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+/* ─── Subscribe Intro ────────────────────── */
+.gx-text-subscribe-intro {
+    margin-bottom: 16px;
+}
+.gx-text-subscribe-intro h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 6px 0;
+}
+.gx-text-subscribe-intro p {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ─── Consent Checkbox ───────────────────── */
+.gx-text-consent {
+    padding: 4px 0;
+}
+.gx-text-consent label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12px;
+    color: #666;
+    line-height: 1.4;
+    cursor: pointer;
+}
+.gx-text-consent input[type="checkbox"] {
+    margin-top: 2px;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--gx-header-bg, #25D366);
+}
+
+.gx-text-honeypot {
+    display: none !important;
+}
+
+/* ─── Widget Footer ──────────────────────── */
+.gx-text-widget-footer {
+    padding: 10px 20px;
+    text-align: center;
+    font-size: 11px;
+    color: #bbb;
+    border-top: 1px solid #f0f0f0;
+    background: var(--gx-widget-bg, #fff);
+}
+.gx-text-widget-footer strong {
+    color: #999;
+}
+
+/* ─── Inline Embed Styles ────────────────── */
+.gx-text-inline {
+    max-width: 420px;
+    margin: 0 auto;
+}
+.gx-text-inline .gx-text-widget {
+    position: relative;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    pointer-events: auto;
+    width: 100%;
+    max-width: 100%;
+    max-height: none;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+}
+.gx-text-inline .gx-text-widget.is-visible {
+    transform: none;
+}
+
+/* Inline button */
+.gx-text-inline-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 50px;
+    background: var(--gx-btn-color, #25D366);
+    color: var(--gx-btn-text, #fff);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.gx-text-inline-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    filter: brightness(1.05);
+}
+
+.gx-text-inline-brand {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.16);
+}
+
+.gx-text-inline-brand img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* ─── Responsive ─────────────────────────── */
+@media (max-width: 480px) {
+    .gx-text-widget {
+        width: calc(100vw - 24px);
+        max-height: calc(100vh - 120px);
+        border-radius: 12px;
+    }
+
+    .gx-text-btn:hover {
+        width: var(--gx-btn-size, 60px);
+        padding: 0;
+    }
+    .gx-text-btn.is-text-only,
+    .gx-text-btn.is-text-only:hover {
+        width: auto;
+        padding: 0 18px;
+    }
+    .gx-text-btn:hover .gx-text-btn-label:not(.gx-text-only) {
+        font-size: 0;
+        opacity: 0;
+        max-width: 0;
+        margin-left: 0;
+    }
+
+    .gx-text-widget-header {
+        padding: 16px;
+    }
+    .gx-text-widget-heading {
+        gap: 10px;
+    }
+    .gx-text-widget-brand {
+        width: 34px;
+        height: 34px;
+    }
+    .gx-text-widget-header h3 {
+        font-size: 16px;
+    }
+    .gx-text-tab-content {
+        padding: 16px;
+    }
+}
+
+/* ─── Accessibility ──────────────────────── */
+.gx-text-btn:focus-visible,
+.gx-text-submit:focus-visible,
+.gx-text-tab:focus-visible {
+    outline: 3px solid var(--gx-header-bg, #25D366);
+    outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .gx-text-btn,
+    .gx-text-widget,
+    .gx-text-tab-content,
+    .gx-text-success-icon {
+        animation: none !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ─── Dark mode support ──────────────────── */
+@media (prefers-color-scheme: dark) {
+    .gx-text-widget {
+        color-scheme: light; /* Force light mode for widget */
+    }
+}
