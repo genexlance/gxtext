@@ -1,10 +1,10 @@
 <?php
 /**
- * Plugin Name: GX Text by Genex Marketing Agency Ltd
- * Plugin URI:  https://genexmarketing.com/gx-text
+ * Plugin Name: GX Text
+ * Plugin URI:  https://genexmarketing.com/labs/gx-text
  * Description: A powerful "Text Us Now" button plugin with Twilio SMS integration, customizable animated UI, and text subscription/newsletter system.
  * Version:     1.1.0
- * Author:      Genex Marketing Agency Ltd
+ * Author:      Genex Marketing Agency Ltd.
  * Author URI:  https://genexmarketing.com
  * License:     GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -115,9 +115,12 @@ final class GX_Text {
             'button_text_color'    => '#ffffff',
             'button_icon'          => 'chat',
             'button_label'         => 'Text Us!',
+            'button_graphic_mode'  => 'badge',
             'button_size'          => '60',
             'button_border_radius' => '50',
+            'brand_logo_url'       => '',
             'button_graphic_url'   => '',
+            'button_hover_graphic_url' => '',
             'button_graphic_size'  => '28',
             'animation_type'       => 'pulse',
             'show_on_mobile'       => '1',

@@ -5,7 +5,9 @@
 
 /* Reset for widget scope */
 .gx-text-floating,
-.gx-text-floating * {
+.gx-text-floating *,
+.gx-text-inline,
+.gx-text-inline * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -42,6 +44,31 @@
     outline: none;
 }
 
+.gx-text-btn-graphic-stack {
+    position: relative;
+    display: inline-block;
+    line-height: 0;
+}
+
+.gx-text-btn-graphic {
+    display: block;
+    transition: opacity 0.25s ease;
+}
+
+.gx-text-btn-graphic img {
+    display: block;
+    height: auto;
+    width: auto;
+    max-width: none;
+    max-height: none;
+}
+
+.gx-text-btn-graphic-hover {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+}
+
 .gx-text-btn:hover {
     transform: scale(1.08);
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25), 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -63,6 +90,37 @@
 }
 .gx-text-btn:hover::after {
     opacity: 1;
+}
+
+.gx-text-btn.is-graphic-replace {
+    width: auto;
+    height: auto;
+    min-width: 0;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+}
+
+.gx-text-btn.is-graphic-replace::after {
+    display: none;
+}
+
+.gx-text-btn.is-graphic-replace:hover {
+    width: auto;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.gx-text-btn.is-graphic-replace:hover .gx-text-btn-graphic-hover {
+    opacity: 1;
+}
+
+.gx-text-btn.is-graphic-replace:hover .gx-text-btn-graphic-default.has-hover {
+    opacity: 0;
 }
 
 .gx-text-btn-icon {
@@ -139,7 +197,8 @@
 /* When widget is open */
 .gx-text-floating.is-open .gx-text-btn-icon,
 .gx-text-floating.is-open .gx-text-btn-brand,
-.gx-text-floating.is-open .gx-text-btn-label {
+.gx-text-floating.is-open .gx-text-btn-label,
+.gx-text-floating.is-open .gx-text-btn-graphic-stack {
     display: none;
 }
 .gx-text-floating.is-open .gx-text-btn-close {
@@ -231,6 +290,10 @@
     visibility: visible;
     transform: translateY(0) scale(1);
     pointer-events: auto;
+}
+
+.gx-text-floating.is-manual .gx-text-widget {
+    width: min(420px, calc(100vw - 32px));
 }
 
 /* ─── Widget Header ──────────────────────── */
@@ -584,6 +647,14 @@
     max-width: 420px;
     margin: 0 auto;
 }
+.gx-text-inline-launcher {
+    display: inline-flex;
+    max-width: 100%;
+    vertical-align: middle;
+}
+.gx-text-inline button {
+    font: inherit;
+}
 .gx-text-inline .gx-text-widget {
     position: relative;
     opacity: 1;
@@ -604,11 +675,15 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 12px 24px;
-    border-radius: 50px;
+    justify-content: center;
+    width: auto;
+    min-width: var(--gx-inline-btn-min-width, var(--gx-btn-size, 60px));
+    min-height: var(--gx-inline-btn-min-height, var(--gx-btn-size, 60px));
+    padding: 0 var(--gx-inline-btn-padding-x, 22px);
+    border-radius: calc(var(--gx-btn-size, 60px) / 2);
     background: var(--gx-btn-color, #25D366);
     color: var(--gx-btn-text, #fff);
-    font-size: 15px;
+    font-size: var(--gx-inline-btn-font-size, 15px);
     font-weight: 600;
     text-decoration: none;
     border: none;
@@ -621,10 +696,55 @@
     box-shadow: 0 4px 16px rgba(0,0,0,0.18);
     filter: brightness(1.05);
 }
+.gx-text-inline-btn.is-graphic-replace {
+    min-width: 0;
+    min-height: 0;
+}
+.gx-text-inline-btn .gx-text-btn-label {
+    font-size: inherit;
+    opacity: 1;
+    max-width: none;
+    overflow: visible;
+    white-space: nowrap;
+}
+.gx-text-inline-btn:hover .gx-text-btn-label:not(.gx-text-only) {
+    font-size: inherit;
+    opacity: 1;
+    max-width: none;
+    margin-left: 0;
+}
+.gx-text-inline-btn .gx-text-btn-icon {
+    flex-shrink: 0;
+}
+.gx-text-inline-btn:hover {
+    width: auto;
+    padding: 0 var(--gx-inline-btn-padding-x, 22px);
+}
+.gx-text-inline-btn.is-graphic-replace:hover {
+    padding: 0;
+    transform: scale(1.04);
+    box-shadow: none;
+    filter: none;
+}
+.gx-text-inline-btn.gx-text-inline-btn-size-small {
+    --gx-inline-btn-font-size: 13px;
+    --gx-inline-btn-min-height: 42px;
+    --gx-inline-btn-padding-x: 18px;
+}
+.gx-text-inline-btn.gx-text-inline-btn-size-medium {
+    --gx-inline-btn-font-size: 15px;
+    --gx-inline-btn-min-height: 52px;
+    --gx-inline-btn-padding-x: 22px;
+}
+.gx-text-inline-btn.gx-text-inline-btn-size-large {
+    --gx-inline-btn-font-size: 17px;
+    --gx-inline-btn-min-height: 60px;
+    --gx-inline-btn-padding-x: 28px;
+}
 
 .gx-text-inline-brand {
-    width: 24px;
-    height: 24px;
+    width: var(--gx-btn-graphic-size, 28px);
+    height: var(--gx-btn-graphic-size, 28px);
     border-radius: 50%;
     overflow: hidden;
     display: inline-flex;

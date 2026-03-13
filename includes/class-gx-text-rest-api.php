@@ -80,7 +80,7 @@ class GX_Text_REST_API {
         $options        = GX_Text_Options::all();
         $business_phone = $options['business_phone'];
         $notification   = sprintf(
-            "New message from %s (%s):\n\n%s\n\n- via GX Text Widget",
+            "New message from %s (%s):\n\n%s\n\n",
             $name,
             $phone,
             $message

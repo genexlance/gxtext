@@ -27,43 +27,28 @@
             updatePreview();
         });
 
-        $('#gx-text-select-graphic').on('click', function(e) {
-            e.preventDefault();
+        bindGraphicPicker('#gx-text-select-brand-logo', '#brand_logo_url', '#gx-text-brand-logo-preview', gxTextAdmin.strings.chooseBrandLogo, gxTextAdmin.strings.useBrandLogo);
+        bindGraphicPicker('#gx-text-select-graphic', '#button_graphic_url', '#gx-text-graphic-preview', gxTextAdmin.strings.chooseGraphic, gxTextAdmin.strings.useGraphic);
+        bindGraphicPicker('#gx-text-select-hover-graphic', '#button_hover_graphic_url', '#gx-text-hover-graphic-preview', gxTextAdmin.strings.chooseHoverGraphic, gxTextAdmin.strings.useHoverGraphic);
 
-            if (mediaFrame) {
-                mediaFrame.open();
-                return;
-            }
-
-            mediaFrame = wp.media({
-                title: gxTextAdmin.strings.chooseGraphic,
-                button: {
-                    text: gxTextAdmin.strings.useGraphic
-                },
-                multiple: false,
-                library: {
-                    type: 'image'
-                }
-            });
-
-            mediaFrame.on('select', function() {
-                var attachment = mediaFrame.state().get('selection').first().toJSON();
-                $('#button_graphic_url').val(attachment.url).trigger('input');
-                renderGraphicPreview(attachment.url);
-            });
-
-            mediaFrame.open();
+        bindGraphicRemove('#gx-text-remove-brand-logo', '#brand_logo_url', '#gx-text-brand-logo-preview');
+        bindGraphicRemove('#gx-text-remove-graphic', '#button_graphic_url', '#gx-text-graphic-preview');
+        bindGraphicRemove('#gx-text-remove-hover-graphic', '#button_hover_graphic_url', '#gx-text-hover-graphic-preview');
+        $('#brand_logo_url').on('input change', function() {
+            renderGraphicPreview($('#gx-text-brand-logo-preview'), $(this).val() || '');
         });
-
-        $('#gx-text-remove-graphic').on('click', function(e) {
-            e.preventDefault();
-            $('#button_graphic_url').val('').trigger('input');
-            renderGraphicPreview('');
+        $('#button_graphic_url').on('input change', function() {
+            renderGraphicPreview($('#gx-text-graphic-preview'), $(this).val() || '');
+        });
+        $('#button_hover_graphic_url').on('input change', function() {
+            renderGraphicPreview($('#gx-text-hover-graphic-preview'), $(this).val() || '');
         });
 
         // Initial preview
         updatePreview();
-        renderGraphicPreview($('#button_graphic_url').val() || '');
+        renderGraphicPreview($('#gx-text-brand-logo-preview'), $('#brand_logo_url').val() || '');
+        renderGraphicPreview($('#gx-text-graphic-preview'), $('#button_graphic_url').val() || '');
+        renderGraphicPreview($('#gx-text-hover-graphic-preview'), $('#button_hover_graphic_url').val() || '');
 
         // Test Twilio Connection
         $('#gx-text-test-twilio').on('click', function() {
@@ -168,34 +153,50 @@
             var offsetY = parseInt($('#offset_y').val()) || 20;
             var icon = $('#button_icon').val() || 'chat';
             var graphicUrl = $('#button_graphic_url').val() || '';
+            var hoverGraphicUrl = $('#button_hover_graphic_url').val() || '';
+            var graphicMode = $('#button_graphic_mode').val() || 'badge';
             var graphicSize = parseInt($('#button_graphic_size').val()) || 28;
             var $icon = $btn.find('.gx-preview-icon');
             var $graphic = $btn.find('.gx-preview-graphic');
             var $graphicImg = $graphic.find('img');
+            var $graphicStack = $btn.find('.gx-preview-graphic-stack');
+            var $graphicDefault = $graphicStack.find('.gx-preview-graphic-layer-default img');
+            var $graphicHover = $graphicStack.find('.gx-preview-graphic-layer-hover img');
             var $label = $btn.find('.gx-preview-label');
+            var $manualNote = $('#gx-preview-manual-note');
 
             // Scale for preview (smaller while still showing the label)
             var previewSize = Math.round(size * 0.78);
             var previewOffsetX = Math.round(offsetX * 0.5);
             var previewOffsetY = Math.round(offsetY * 0.5);
-            var isTextOnly = icon === 'text' && !graphicUrl;
+            var isGraphicReplace = graphicMode === 'replace' && !!graphicUrl;
+            var isTextOnly = icon === 'text' && !graphicUrl && !isGraphicReplace;
 
             // Reset position
             $btn.css({ top: 'auto', bottom: 'auto', left: 'auto', right: 'auto' });
 
             // Set position
-            var parts = position.split('-');
-            $btn.css(parts[0], previewOffsetY + 'px');
-            $btn.css(parts[1], previewOffsetX + 'px');
+            if (position === 'manual') {
+                $btn.css({ top: '50%', left: '50%', right: 'auto', bottom: 'auto', transform: 'translate(-50%, -50%)' });
+                $btn.addClass('is-manual-preview');
+                $manualNote.prop('hidden', false);
+            } else {
+                var parts = position.split('-');
+                $btn.css(parts[0], previewOffsetY + 'px');
+                $btn.css(parts[1], previewOffsetX + 'px');
+                $btn.css('transform', '');
+                $btn.removeClass('is-manual-preview');
+                $manualNote.prop('hidden', true);
+            }
 
             // Set styles
             $btn.css({
-                backgroundColor: color,
+                backgroundColor: isGraphicReplace ? 'transparent' : color,
                 color: textColor,
-                minHeight: previewSize + 'px',
-                borderRadius: radius + '%',
+                minHeight: isGraphicReplace ? '0' : previewSize + 'px',
+                borderRadius: isGraphicReplace ? '0' : radius + '%',
                 fontSize: '11px',
-                padding: '0 14px',
+                padding: isGraphicReplace ? '0' : '0 14px',
                 width: 'auto'
             });
 
@@ -204,13 +205,23 @@
 
             // Set icon / graphic
             var iconSvg = '';
-            if (graphicUrl) {
+            if (isGraphicReplace) {
+                $graphicDefault.attr('src', graphicUrl);
+                $graphicHover.attr('src', hoverGraphicUrl || graphicUrl);
+                $graphicStack.find('.gx-preview-graphic-layer-default').toggleClass('has-hover', !!hoverGraphicUrl);
+                $graphicStack.css('display', 'inline-flex').prop('hidden', false);
+                $graphic.prop('hidden', true).hide();
+                $icon.hide().empty();
+                $label.hide();
+            } else if (graphicUrl) {
                 $graphicImg.attr('src', graphicUrl);
                 $graphic.css({
                     width: graphicSize + 'px',
                     height: graphicSize + 'px',
                     display: 'inline-flex'
                 }).prop('hidden', false);
+                $graphicStack.find('.gx-preview-graphic-layer-default').removeClass('has-hover');
+                $graphicStack.prop('hidden', true).hide();
                 $icon.hide().empty();
             } else {
                 if (icon === 'chat') {
@@ -222,8 +233,12 @@
                 }
                 $icon.html(iconSvg).toggle(!!iconSvg);
                 $graphic.prop('hidden', true).hide();
+                $graphicStack.find('.gx-preview-graphic-layer-default').removeClass('has-hover');
+                $graphicStack.prop('hidden', true).hide();
             }
-            $label.toggle(!!label);
+            if (!isGraphicReplace) {
+                $label.toggle(!!label);
+            }
 
             if (isTextOnly) {
                 $icon.hide().empty();
@@ -236,8 +251,40 @@
             }
         }
 
-        function renderGraphicPreview(url) {
-            var $preview = $('#gx-text-graphic-preview');
+        function bindGraphicPicker(buttonSelector, inputSelector, previewSelector, title, buttonText) {
+            $(buttonSelector).on('click', function(e) {
+                e.preventDefault();
+
+                mediaFrame = wp.media({
+                    title: title,
+                    button: {
+                        text: buttonText
+                    },
+                    multiple: false,
+                    library: {
+                        type: 'image'
+                    }
+                });
+
+                mediaFrame.on('select', function() {
+                    var attachment = mediaFrame.state().get('selection').first().toJSON();
+                    $(inputSelector).val(attachment.url).trigger('input');
+                    renderGraphicPreview($(previewSelector), attachment.url);
+                });
+
+                mediaFrame.open();
+            });
+        }
+
+        function bindGraphicRemove(buttonSelector, inputSelector, previewSelector) {
+            $(buttonSelector).on('click', function(e) {
+                e.preventDefault();
+                $(inputSelector).val('').trigger('input');
+                renderGraphicPreview($(previewSelector), '');
+            });
+        }
+
+        function renderGraphicPreview($preview, url) {
             if (!$preview.length) return;
 
             if (url) {

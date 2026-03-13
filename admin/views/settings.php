@@ -12,14 +12,25 @@
         <div class="gx-text-section">
             <h2><span class="dashicons dashicons-lock"></span> <?php esc_html_e( 'Twilio Configuration', 'gx-text' ); ?></h2>
             <p class="description"><?php esc_html_e( 'Your Twilio credentials are encrypted and stored securely in the WordPress database.', 'gx-text' ); ?></p>
+            <?php
+            $sid_decrypted        = GX_Text_Encryption::decrypt( isset( $options['twilio_account_sid'] ) ? $options['twilio_account_sid'] : '' );
+            $token_decrypted      = GX_Text_Encryption::decrypt( isset( $options['twilio_auth_token'] ) ? $options['twilio_auth_token'] : '' );
+            $sid_is_valid         = '' !== $sid_decrypted && GX_Text_Twilio::is_valid_account_sid( $sid_decrypted );
+            $token_is_valid       = '' !== $token_decrypted && GX_Text_Twilio::is_valid_auth_token( $token_decrypted );
+            $credentials_corrupt  = ( ! empty( $options['twilio_account_sid'] ) && ! $sid_is_valid ) || ( ! empty( $options['twilio_auth_token'] ) && ! $token_is_valid );
+            ?>
+            <?php if ( $credentials_corrupt ) : ?>
+                <div class="notice notice-warning inline">
+                    <p><?php esc_html_e( 'Stored Twilio credentials do not look valid anymore. Re-enter your Account SID and Auth Token from the Twilio console, then save settings before testing again.', 'gx-text' ); ?></p>
+                </div>
+            <?php endif; ?>
 
             <table class="form-table">
                 <tr>
                     <th><label for="twilio_account_sid"><?php esc_html_e( 'Account SID', 'gx-text' ); ?></label></th>
                     <td>
                         <?php
-                        $sid_decrypted = GX_Text_Encryption::decrypt( isset( $options['twilio_account_sid'] ) ? $options['twilio_account_sid'] : '' );
-                        $sid_display = ! empty( $sid_decrypted ) ? '••••••••' . substr( $sid_decrypted, -4 ) : '';
+                        $sid_display = $sid_is_valid ? '••••••••' . substr( $sid_decrypted, -4 ) : '';
                         ?>
                         <input type="text" id="twilio_account_sid" name="gx_text_options[twilio_account_sid]"
                                value="<?php echo esc_attr( $sid_display ); ?>"
@@ -32,8 +43,7 @@
                     <th><label for="twilio_auth_token"><?php esc_html_e( 'Auth Token', 'gx-text' ); ?></label></th>
                     <td>
                         <?php
-                        $token_decrypted = GX_Text_Encryption::decrypt( isset( $options['twilio_auth_token'] ) ? $options['twilio_auth_token'] : '' );
-                        $token_display = ! empty( $token_decrypted ) ? '••••••••' . substr( $token_decrypted, -4 ) : '';
+                        $token_display = $token_is_valid ? '••••••••' . substr( $token_decrypted, -4 ) : '';
                         ?>
                         <input type="password" id="twilio_auth_token" name="gx_text_options[twilio_auth_token]"
                                value="<?php echo esc_attr( $token_display ); ?>"

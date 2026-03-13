@@ -36,27 +36,23 @@ class GX_Text_Options {
         $output   = array();
 
         foreach ( array( 'twilio_account_sid', 'twilio_auth_token' ) as $field ) {
-            $submitted = isset( $input[ $field ] ) ? trim( wp_unslash( (string) $input[ $field ] ) ) : '';
-
-            if ( '' === $submitted || false !== strpos( $submitted, '••••' ) ) {
-                $output[ $field ] = isset( $old[ $field ] ) ? $old[ $field ] : '';
-                continue;
-            }
-
-            $output[ $field ] = GX_Text_Encryption::encrypt( sanitize_text_field( $submitted ) );
+            $output[ $field ] = self::sanitize_twilio_credential( $field, $input, $old );
         }
 
         $output['twilio_phone_number'] = self::sanitize_phone_setting( 'twilio_phone_number', $input, $old, $defaults );
         $output['business_phone']      = self::sanitize_phone_setting( 'business_phone', $input, $old, $defaults );
 
-        $output['button_position']      = self::sanitize_choice( self::input_value( $input, 'button_position', $old, $defaults ), array( 'bottom-right', 'bottom-left', 'top-right', 'top-left' ), $defaults['button_position'] );
+        $output['button_position']      = self::sanitize_choice( self::input_value( $input, 'button_position', $old, $defaults ), array( 'bottom-right', 'bottom-left', 'top-right', 'top-left', 'manual' ), $defaults['button_position'] );
         $output['button_color']         = self::sanitize_color( self::input_value( $input, 'button_color', $old, $defaults ), $defaults['button_color'] );
         $output['button_text_color']    = self::sanitize_color( self::input_value( $input, 'button_text_color', $old, $defaults ), $defaults['button_text_color'] );
         $output['button_icon']          = self::sanitize_choice( self::input_value( $input, 'button_icon', $old, $defaults ), array( 'chat', 'sms', 'message', 'text' ), $defaults['button_icon'] );
         $output['button_label']         = self::sanitize_text( self::input_value( $input, 'button_label', $old, $defaults ) );
+        $output['button_graphic_mode']  = self::sanitize_choice( self::input_value( $input, 'button_graphic_mode', $old, $defaults ), array( 'badge', 'replace' ), $defaults['button_graphic_mode'] );
         $output['button_size']          = (string) self::sanitize_int( self::input_value( $input, 'button_size', $old, $defaults ), 40, 100, (int) $defaults['button_size'] );
         $output['button_border_radius'] = (string) self::sanitize_int( self::input_value( $input, 'button_border_radius', $old, $defaults ), 0, 50, (int) $defaults['button_border_radius'] );
+        $output['brand_logo_url']       = self::sanitize_image_url( self::input_value( $input, 'brand_logo_url', $old, $defaults ) );
         $output['button_graphic_url']   = self::sanitize_image_url( self::input_value( $input, 'button_graphic_url', $old, $defaults ) );
+        $output['button_hover_graphic_url'] = self::sanitize_image_url( self::input_value( $input, 'button_hover_graphic_url', $old, $defaults ) );
         $output['button_graphic_size']  = (string) self::sanitize_int( self::input_value( $input, 'button_graphic_size', $old, $defaults ), 20, 44, (int) $defaults['button_graphic_size'] );
         $output['animation_type']       = self::sanitize_choice( self::input_value( $input, 'animation_type', $old, $defaults ), array( 'pulse', 'bounce', 'shake', 'glow', 'none' ), $defaults['animation_type'] );
         $output['show_on_mobile']       = ! empty( $input['show_on_mobile'] ) ? '1' : '0';
@@ -186,6 +182,73 @@ class GX_Text_Options {
         );
 
         return isset( $old[ $field ] ) ? $old[ $field ] : '';
+    }
+
+    private static function sanitize_twilio_credential( $field, $input, $old ) {
+        $submitted     = isset( $input[ $field ] ) ? trim( wp_unslash( (string) $input[ $field ] ) ) : '';
+        $old_encrypted = isset( $old[ $field ] ) ? (string) $old[ $field ] : '';
+        $old_plaintext = GX_Text_Encryption::decrypt( $old_encrypted );
+        $old_is_valid  = self::is_valid_twilio_credential( $field, $old_plaintext );
+        $label         = 'twilio_account_sid' === $field ? __( 'Twilio Account SID', 'gx-text' ) : __( 'Twilio Auth Token', 'gx-text' );
+
+        if ( '' === $submitted || false !== strpos( $submitted, '••••' ) ) {
+            if ( $old_is_valid ) {
+                return $old_encrypted;
+            }
+
+            if ( '' !== $old_encrypted ) {
+                add_settings_error(
+                    'gx_text_options',
+                    'gx_text_invalid_stored_' . $field,
+                    sprintf(
+                        /* translators: %s: field label. */
+                        __( '%s is invalid or can no longer be decrypted. Re-enter it from the Twilio console and save again.', 'gx-text' ),
+                        $label
+                    )
+                );
+            }
+
+            return '';
+        }
+
+        $submitted = sanitize_text_field( $submitted );
+        if ( self::is_valid_twilio_credential( $field, $submitted ) ) {
+            return GX_Text_Encryption::encrypt( $submitted );
+        }
+
+        add_settings_error(
+            'gx_text_options',
+            'gx_text_invalid_' . $field,
+            self::twilio_credential_error_message( $field )
+        );
+
+        return $old_is_valid ? $old_encrypted : '';
+    }
+
+    private static function is_valid_twilio_credential( $field, $value ) {
+        $value = trim( (string) $value );
+
+        if ( '' === $value ) {
+            return false;
+        }
+
+        if ( 'twilio_account_sid' === $field ) {
+            return 1 === preg_match( '/^AC[a-f0-9]{32}$/i', $value );
+        }
+
+        if ( 'twilio_auth_token' === $field ) {
+            return 1 === preg_match( '/^[A-Za-z0-9]{32}$/', $value );
+        }
+
+        return false;
+    }
+
+    private static function twilio_credential_error_message( $field ) {
+        if ( 'twilio_account_sid' === $field ) {
+            return __( 'Twilio Account SID must start with AC and be 34 characters long.', 'gx-text' );
+        }
+
+        return __( 'Twilio Auth Token must be the 32-character token from your Twilio console.', 'gx-text' );
     }
 
     private static function sanitize_page_ids( $value ) {

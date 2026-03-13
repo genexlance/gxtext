@@ -19,27 +19,34 @@ class GX_Text_Frontend {
     }
 
     public function render_floating_widget() {
-        if ( ! $this->should_display() ) {
+        $options            = GX_Text_Options::all();
+        $is_manual_position = 'manual' === ( $options['button_position'] ?? '' );
+
+        if ( ! $this->should_display() && ! ( $is_manual_position && GX_Text_Assets::launcher_used() ) ) {
             return;
         }
 
-        $options           = GX_Text_Options::all();
-        $animation_class   = 'none' !== $options['animation_type'] ? 'gx-anim-' . esc_attr( $options['animation_type'] ) : '';
-        $button_graphic    = $options['button_graphic_url'];
-        $has_graphic       = ! empty( $button_graphic );
-        $icon              = $has_graphic ? '' : $this->get_icon_svg( $options['button_icon'], $options['button_text_color'] );
-        $widget_brand      = $this->get_brand_badge_html( $button_graphic, 'gx-text-widget-brand' );
-        $tab_brand         = $this->get_brand_badge_html( $button_graphic, 'gx-text-tab-brand' );
-        $enable_subscribe  = '1' === $options['enable_subscribe'];
-        $show_text_only    = 'text' === $options['button_icon'] && ! $has_graphic;
-        $button_classes    = array( 'gx-text-btn' );
-        $button_label      = trim( $options['button_label'] );
+        $animation_class      = 'none' !== $options['animation_type'] ? 'gx-anim-' . esc_attr( $options['animation_type'] ) : '';
+        $button_graphic       = isset( $options['button_graphic_url'] ) ? $options['button_graphic_url'] : '';
+        $button_hover_graphic = isset( $options['button_hover_graphic_url'] ) ? $options['button_hover_graphic_url'] : '';
+        $brand_logo           = $this->get_brand_logo_url( $options );
+        $graphic_mode         = isset( $options['button_graphic_mode'] ) ? $options['button_graphic_mode'] : 'badge';
+        $is_replace_graphic   = 'replace' === $graphic_mode && ! empty( $button_graphic );
+        $has_badge_graphic    = ! $is_replace_graphic && ! empty( $button_graphic );
+        $icon                 = ( $has_badge_graphic || $is_replace_graphic ) ? '' : $this->get_icon_svg( $options['button_icon'], $options['button_text_color'] );
+        $widget_brand         = $this->get_brand_badge_html( $brand_logo, 'gx-text-widget-brand' );
+        $tab_brand            = $this->get_brand_badge_html( $brand_logo, 'gx-text-tab-brand' );
+        $enable_subscribe     = '1' === $options['enable_subscribe'];
+        $show_text_only       = 'text' === $options['button_icon'] && ! $has_badge_graphic && ! $is_replace_graphic;
+        $button_classes       = array( 'gx-text-btn' );
+        $floating_classes     = array( 'gx-text-floating' );
+        $button_label         = trim( $options['button_label'] );
 
         if ( $animation_class ) {
             $button_classes[] = $animation_class;
         }
 
-        if ( $has_graphic ) {
+        if ( $has_badge_graphic ) {
             $button_classes[] = 'has-graphic';
         }
 
@@ -47,26 +54,38 @@ class GX_Text_Frontend {
             $button_classes[] = 'is-text-only';
         }
 
+        if ( $is_replace_graphic ) {
+            $button_classes[] = 'is-graphic-replace';
+        }
+
+        if ( $is_manual_position ) {
+            $floating_classes[] = 'is-manual';
+        }
+
         ?>
         <!-- GX Text by Genex Marketing Agency Ltd -->
-        <div class="gx-text-floating" id="gx-text-floating" role="complementary" aria-label="<?php esc_attr_e( 'Text Us Widget', 'gx-text' ); ?>">
-            <button class="<?php echo esc_attr( implode( ' ', $button_classes ) ); ?>" id="gx-text-toggle" aria-expanded="false" aria-controls="gx-text-widget" title="<?php echo esc_attr( $button_label ? $button_label : __( 'Open text widget', 'gx-text' ) ); ?>">
-                <?php if ( $has_graphic ) : ?>
-                    <span class="gx-text-btn-brand" aria-hidden="true">
-                        <img src="<?php echo esc_url( $button_graphic ); ?>" alt="" loading="lazy" decoding="async" />
+        <div class="<?php echo esc_attr( implode( ' ', $floating_classes ) ); ?>" id="gx-text-floating" role="complementary" aria-label="<?php esc_attr_e( 'Text Us Widget', 'gx-text' ); ?>">
+            <?php if ( ! $is_manual_position ) : ?>
+                <button class="<?php echo esc_attr( implode( ' ', $button_classes ) ); ?>" id="gx-text-toggle" aria-expanded="false" aria-controls="gx-text-widget" title="<?php echo esc_attr( $button_label ? $button_label : __( 'Open text widget', 'gx-text' ) ); ?>">
+                    <?php if ( $is_replace_graphic ) : ?>
+                        <?php echo $this->get_replace_graphic_html( $button_graphic, $button_hover_graphic, 'gx-text-btn-graphic-stack' ); ?>
+                    <?php elseif ( $has_badge_graphic ) : ?>
+                        <span class="gx-text-btn-brand" aria-hidden="true">
+                            <img src="<?php echo esc_url( $button_graphic ); ?>" alt="" loading="lazy" decoding="async" />
+                        </span>
+                    <?php elseif ( $icon ) : ?>
+                        <span class="gx-text-btn-icon" aria-hidden="true"><?php echo $icon; ?></span>
+                    <?php endif; ?>
+
+                    <?php if ( '' !== $button_label && ! $is_replace_graphic ) : ?>
+                        <span class="gx-text-btn-label<?php echo $show_text_only ? ' gx-text-only' : ''; ?>"><?php echo esc_html( $button_label ); ?></span>
+                    <?php endif; ?>
+
+                    <span class="gx-text-btn-close" aria-hidden="true">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="<?php echo esc_attr( $options['button_text_color'] ); ?>"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
                     </span>
-                <?php elseif ( $icon ) : ?>
-                    <span class="gx-text-btn-icon" aria-hidden="true"><?php echo $icon; ?></span>
-                <?php endif; ?>
-
-                <?php if ( '' !== $button_label ) : ?>
-                    <span class="gx-text-btn-label<?php echo $show_text_only ? ' gx-text-only' : ''; ?>"><?php echo esc_html( $button_label ); ?></span>
-                <?php endif; ?>
-
-                <span class="gx-text-btn-close" aria-hidden="true">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="<?php echo esc_attr( $options['button_text_color'] ); ?>"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-                </span>
-            </button>
+                </button>
+            <?php endif; ?>
 
             <div class="gx-text-widget" id="gx-text-widget" aria-hidden="true">
                 <div class="gx-text-widget-header">
@@ -245,5 +264,42 @@ class GX_Text_Frontend {
             esc_attr( $class_name ),
             esc_url( $graphic_url )
         );
+    }
+
+    private function get_brand_logo_url( $options ) {
+        $brand_logo = isset( $options['brand_logo_url'] ) ? $options['brand_logo_url'] : '';
+
+        if ( ! empty( $brand_logo ) ) {
+            return $brand_logo;
+        }
+
+        if ( isset( $options['button_graphic_mode'] ) && 'replace' === $options['button_graphic_mode'] ) {
+            return '';
+        }
+
+        return isset( $options['button_graphic_url'] ) ? $options['button_graphic_url'] : '';
+    }
+
+    private function get_replace_graphic_html( $graphic_url, $hover_graphic_url, $class_name ) {
+        if ( empty( $graphic_url ) ) {
+            return '';
+        }
+
+        $has_hover = ! empty( $hover_graphic_url );
+
+        ob_start();
+        ?>
+        <span class="<?php echo esc_attr( $class_name ); ?>" aria-hidden="true">
+            <span class="gx-text-btn-graphic gx-text-btn-graphic-default<?php echo $has_hover ? ' has-hover' : ''; ?>">
+                <img src="<?php echo esc_url( $graphic_url ); ?>" alt="" loading="lazy" decoding="async" />
+            </span>
+            <?php if ( $has_hover ) : ?>
+                <span class="gx-text-btn-graphic gx-text-btn-graphic-hover">
+                    <img src="<?php echo esc_url( $hover_graphic_url ); ?>" alt="" loading="lazy" decoding="async" />
+                </span>
+            <?php endif; ?>
+        </span>
+        <?php
+        return ob_get_clean();
     }
 }

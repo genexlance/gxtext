@@ -40,7 +40,7 @@ class GX_Text_Encryption {
             }
 
             $plaintext = self::decrypt( $options[ $field ] );
-            if ( '' === $plaintext ) {
+            if ( '' === $plaintext || ! self::is_valid_twilio_plaintext( $field, $plaintext ) ) {
                 continue;
             }
 
@@ -134,5 +134,33 @@ class GX_Text_Encryption {
         $result = openssl_decrypt( $cipher, self::$cipher, self::get_key( 'enc' ), OPENSSL_RAW_DATA, $iv );
 
         return false === $result ? '' : $result;
+    }
+
+    private static function is_valid_twilio_plaintext( $field, $plaintext ) {
+        $plaintext = trim( (string) $plaintext );
+
+        if ( '' === $plaintext ) {
+            return false;
+        }
+
+        if ( class_exists( 'GX_Text_Twilio' ) ) {
+            if ( 'twilio_account_sid' === $field ) {
+                return GX_Text_Twilio::is_valid_account_sid( $plaintext );
+            }
+
+            if ( 'twilio_auth_token' === $field ) {
+                return GX_Text_Twilio::is_valid_auth_token( $plaintext );
+            }
+        }
+
+        if ( 'twilio_account_sid' === $field ) {
+            return 1 === preg_match( '/^AC[a-f0-9]{32}$/i', $plaintext );
+        }
+
+        if ( 'twilio_auth_token' === $field ) {
+            return 1 === preg_match( '/^[A-Za-z0-9]{32}$/', $plaintext );
+        }
+
+        return false;
     }
 }

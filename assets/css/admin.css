@@ -323,6 +323,9 @@ input[type="range"] {
 .gx-preview-button:hover {
     transform: scale(1.1);
 }
+.gx-preview-button.is-manual-preview:hover {
+    transform: translate(-50%, -50%) scale(1.05);
+}
 .gx-preview-icon,
 .gx-preview-graphic {
     display: inline-flex;
@@ -341,10 +344,47 @@ input[type="range"] {
     object-fit: cover;
     display: block;
 }
+.gx-preview-graphic-stack {
+    position: relative;
+    display: inline-flex;
+    line-height: 0;
+}
+.gx-preview-graphic-layer {
+    display: inline-flex;
+}
+.gx-preview-graphic-layer img {
+    height: auto;
+    width: auto;
+    max-width: 220px;
+    max-height: 120px;
+    display: block;
+    object-fit: contain;
+}
+.gx-preview-graphic-layer-hover {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+.gx-preview-button:hover .gx-preview-graphic-layer-hover {
+    opacity: 1;
+}
+.gx-preview-button:hover .gx-preview-graphic-layer-default.has-hover {
+    opacity: 0;
+}
 .gx-preview-label {
     font-size: 12px;
     font-weight: 600;
     white-space: nowrap;
+}
+.gx-preview-manual-note {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    text-align: center;
+    font-size: 11px;
+    color: #6b7280;
 }
 
 .gx-text-media-field {

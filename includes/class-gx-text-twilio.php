@@ -13,20 +13,48 @@ class GX_Text_Twilio {
 
     public function __construct() {
         $options           = GX_Text_Options::all();
-        $this->account_sid = GX_Text_Encryption::decrypt( isset( $options['twilio_account_sid'] ) ? $options['twilio_account_sid'] : '' );
-        $this->auth_token  = GX_Text_Encryption::decrypt( isset( $options['twilio_auth_token'] ) ? $options['twilio_auth_token'] : '' );
-        $this->from_number = isset( $options['twilio_phone_number'] ) ? $options['twilio_phone_number'] : '';
+        $this->account_sid = trim( GX_Text_Encryption::decrypt( isset( $options['twilio_account_sid'] ) ? $options['twilio_account_sid'] : '' ) );
+        $this->auth_token  = trim( GX_Text_Encryption::decrypt( isset( $options['twilio_auth_token'] ) ? $options['twilio_auth_token'] : '' ) );
+        $this->from_number = GX_Text_Options::normalize_phone( isset( $options['twilio_phone_number'] ) ? $options['twilio_phone_number'] : '' );
     }
 
     /**
      * Check if Twilio is configured.
      */
     public function is_configured() {
-        return ! empty( $this->account_sid ) && ! empty( $this->auth_token ) && ! empty( $this->from_number );
+        return ! is_wp_error( $this->get_configuration_error() );
     }
 
     public function get_auth_token() {
         return $this->auth_token;
+    }
+
+    public static function is_valid_account_sid( $sid ) {
+        return 1 === preg_match( '/^AC[a-f0-9]{32}$/i', trim( (string) $sid ) );
+    }
+
+    public static function is_valid_auth_token( $token ) {
+        return 1 === preg_match( '/^[A-Za-z0-9]{32}$/', trim( (string) $token ) );
+    }
+
+    private function get_configuration_error() {
+        if ( '' === $this->account_sid || '' === $this->auth_token || '' === $this->from_number ) {
+            return new WP_Error( 'gx_text_twilio', __( 'Twilio credentials are not configured.', 'gx-text' ) );
+        }
+
+        if ( ! self::is_valid_account_sid( $this->account_sid ) ) {
+            return new WP_Error( 'gx_text_twilio', __( 'Stored Twilio Account SID is invalid. Re-enter the Account SID from your Twilio console and save settings again.', 'gx-text' ) );
+        }
+
+        if ( ! self::is_valid_auth_token( $this->auth_token ) ) {
+            return new WP_Error( 'gx_text_twilio', __( 'Stored Twilio Auth Token is invalid. Re-enter the Auth Token from your Twilio console and save settings again.', 'gx-text' ) );
+        }
+
+        if ( '' === $this->from_number ) {
+            return new WP_Error( 'gx_text_twilio', __( 'Twilio phone number is missing or invalid.', 'gx-text' ) );
+        }
+
+        return true;
     }
 
     /**
@@ -37,8 +65,9 @@ class GX_Text_Twilio {
      * @return array|WP_Error
      */
     public function send_sms( $to, $body, $type = 'conversation', $sender_name = '' ) {
-        if ( ! $this->is_configured() ) {
-            return new WP_Error( 'gx_text_twilio', __( 'Twilio is not configured.', 'gx-text' ) );
+        $configuration_error = $this->get_configuration_error();
+        if ( is_wp_error( $configuration_error ) ) {
+            return $configuration_error;
         }
 
         $to   = GX_Text_Options::normalize_phone( $to );
@@ -108,8 +137,9 @@ class GX_Text_Twilio {
      * Test the Twilio connection.
      */
     public function test_connection() {
-        if ( ! $this->is_configured() ) {
-            return new WP_Error( 'gx_text_twilio', __( 'Twilio credentials are not configured.', 'gx-text' ) );
+        $configuration_error = $this->get_configuration_error();
+        if ( is_wp_error( $configuration_error ) ) {
+            return $configuration_error;
         }
 
         $url = sprintf(

@@ -108,6 +108,10 @@ class GX_Text_Admin {
                 'confirmBroadcast' => __( 'Send this message to all active subscribers?', 'gx-text' ),
                 'chooseGraphic' => __( 'Choose Button Graphic', 'gx-text' ),
                 'useGraphic'    => __( 'Use Graphic', 'gx-text' ),
+                'chooseBrandLogo' => __( 'Choose Brand Logo', 'gx-text' ),
+                'useBrandLogo'    => __( 'Use Brand Logo', 'gx-text' ),
+                'chooseHoverGraphic' => __( 'Choose Hover Graphic', 'gx-text' ),
+                'useHoverGraphic'    => __( 'Use Hover Graphic', 'gx-text' ),
             ),
         ) );
     }

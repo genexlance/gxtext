@@ -285,7 +285,7 @@
         var widget = document.getElementById('gx-text-widget');
         var closeBtn = document.getElementById('gx-text-close');
 
-        if (!floating || !toggleBtn || !widget) {
+        if (!floating || !widget) {
             return;
         }
 
@@ -296,7 +296,9 @@
             floating.classList.add('is-open');
             widget.classList.add('is-visible');
             widget.setAttribute('aria-hidden', 'false');
-            toggleBtn.setAttribute('aria-expanded', 'true');
+            if (toggleBtn) {
+                toggleBtn.setAttribute('aria-expanded', 'true');
+            }
         }
 
         function closeWidget() {
@@ -304,19 +306,26 @@
             floating.classList.remove('is-open');
             widget.classList.remove('is-visible');
             widget.setAttribute('aria-hidden', 'true');
-            toggleBtn.setAttribute('aria-expanded', 'false');
+            if (toggleBtn) {
+                toggleBtn.setAttribute('aria-expanded', 'false');
+            }
         }
 
-        toggleBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+        window.gxTextOpenWidget = openWidget;
+        window.gxTextCloseWidget = closeWidget;
 
-            if (isOpen) {
-                closeWidget();
-            } else {
-                openWidget();
-            }
-        });
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (isOpen) {
+                    closeWidget();
+                } else {
+                    openWidget();
+                }
+            });
+        }
 
         if (closeBtn) {
             closeBtn.addEventListener('click', function(e) {
@@ -326,6 +335,10 @@
         }
 
         document.addEventListener('click', function(e) {
+            if (e.target && e.target.closest && e.target.closest('[data-gx-launcher="1"]')) {
+                return;
+            }
+
             if (isOpen && !floating.contains(e.target)) {
                 closeWidget();
             }
@@ -334,7 +347,9 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && isOpen) {
                 closeWidget();
-                toggleBtn.focus();
+                if (toggleBtn) {
+                    toggleBtn.focus();
+                }
             }
         });
 

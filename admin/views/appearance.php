@@ -31,20 +31,61 @@
                 <!-- Branding Graphic -->
                 <div class="gx-text-section">
                     <h2><?php esc_html_e( 'Branding Graphic', 'gx-text' ); ?></h2>
-                    <p class="description"><?php esc_html_e( 'Add a small square logo here. GX Text crops it into a circular brand mark next to the button text.', 'gx-text' ); ?></p>
+                    <p class="description"><?php esc_html_e( 'Use badge mode for a small brand mark beside the button text, or graphic replacement mode to use an image as the entire launcher button.', 'gx-text' ); ?></p>
                     <table class="form-table">
                         <tr>
-                            <th><label for="button_graphic_url"><?php esc_html_e( 'Small Logo Image', 'gx-text' ); ?></label></th>
+                            <th><label for="brand_logo_url"><?php esc_html_e( 'Widget / Tab Logo', 'gx-text' ); ?></label></th>
+                            <td>
+                                <div class="gx-text-media-field">
+                                    <input type="url" id="brand_logo_url" name="gx_text_options[brand_logo_url]" value="<?php echo esc_attr( $options['brand_logo_url'] ?? '' ); ?>" class="regular-text" placeholder="https://example.com/brand-square.png" />
+                                    <button type="button" class="button" id="gx-text-select-brand-logo"><?php esc_html_e( 'Choose Logo', 'gx-text' ); ?></button>
+                                    <button type="button" class="button button-link-delete" id="gx-text-remove-brand-logo"><?php esc_html_e( 'Remove', 'gx-text' ); ?></button>
+                                </div>
+                                <p class="description"><?php esc_html_e( 'Square logo used inside the open widget header and tabs. This stays separate from full-button replacement graphics.', 'gx-text' ); ?></p>
+                                <div class="gx-text-graphic-preview<?php echo empty( $options['brand_logo_url'] ) ? ' is-empty' : ''; ?>" id="gx-text-brand-logo-preview">
+                                    <?php if ( ! empty( $options['brand_logo_url'] ) ) : ?>
+                                        <img src="<?php echo esc_url( $options['brand_logo_url'] ); ?>" alt="" />
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><label for="button_graphic_mode"><?php esc_html_e( 'Graphic Mode', 'gx-text' ); ?></label></th>
+                            <td>
+                                <select id="button_graphic_mode" name="gx_text_options[button_graphic_mode]" class="gx-preview-trigger">
+                                    <option value="badge" <?php selected( $options['button_graphic_mode'] ?? 'badge', 'badge' ); ?>><?php esc_html_e( 'Badge Beside Text', 'gx-text' ); ?></option>
+                                    <option value="replace" <?php selected( $options['button_graphic_mode'] ?? '', 'replace' ); ?>><?php esc_html_e( 'Replace Entire Button', 'gx-text' ); ?></option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><label for="button_graphic_url"><?php esc_html_e( 'Primary Graphic', 'gx-text' ); ?></label></th>
                             <td>
                                 <div class="gx-text-media-field">
                                     <input type="url" id="button_graphic_url" name="gx_text_options[button_graphic_url]" value="<?php echo esc_attr( $options['button_graphic_url'] ?? '' ); ?>" class="regular-text gx-preview-trigger" placeholder="https://example.com/brand-square.png" />
                                     <button type="button" class="button" id="gx-text-select-graphic"><?php esc_html_e( 'Choose Image', 'gx-text' ); ?></button>
                                     <button type="button" class="button button-link-delete" id="gx-text-remove-graphic"><?php esc_html_e( 'Remove', 'gx-text' ); ?></button>
                                 </div>
-                                <p class="description"><?php esc_html_e( 'Use a square logo file. It will display as a small circle beside the button label.', 'gx-text' ); ?></p>
+                                <p class="description"><?php esc_html_e( 'In badge mode this becomes the small logo beside the label. In replace mode this becomes the full launcher graphic.', 'gx-text' ); ?></p>
                                 <div class="gx-text-graphic-preview<?php echo empty( $options['button_graphic_url'] ) ? ' is-empty' : ''; ?>" id="gx-text-graphic-preview">
                                     <?php if ( ! empty( $options['button_graphic_url'] ) ) : ?>
                                         <img src="<?php echo esc_url( $options['button_graphic_url'] ); ?>" alt="" />
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><label for="button_hover_graphic_url"><?php esc_html_e( 'Hover Graphic', 'gx-text' ); ?></label></th>
+                            <td>
+                                <div class="gx-text-media-field">
+                                    <input type="url" id="button_hover_graphic_url" name="gx_text_options[button_hover_graphic_url]" value="<?php echo esc_attr( $options['button_hover_graphic_url'] ?? '' ); ?>" class="regular-text gx-preview-trigger" placeholder="https://example.com/button-hover.png" />
+                                    <button type="button" class="button" id="gx-text-select-hover-graphic"><?php esc_html_e( 'Choose Hover Image', 'gx-text' ); ?></button>
+                                    <button type="button" class="button button-link-delete" id="gx-text-remove-hover-graphic"><?php esc_html_e( 'Remove', 'gx-text' ); ?></button>
+                                </div>
+                                <p class="description"><?php esc_html_e( 'Optional. In replace mode, this image is shown when the launcher is hovered.', 'gx-text' ); ?></p>
+                                <div class="gx-text-graphic-preview<?php echo empty( $options['button_hover_graphic_url'] ) ? ' is-empty' : ''; ?>" id="gx-text-hover-graphic-preview">
+                                    <?php if ( ! empty( $options['button_hover_graphic_url'] ) ) : ?>
+                                        <img src="<?php echo esc_url( $options['button_hover_graphic_url'] ); ?>" alt="" />
                                     <?php endif; ?>
                                 </div>
                             </td>
@@ -54,6 +95,7 @@
                             <td>
                                 <input type="range" id="button_graphic_size" name="gx_text_options[button_graphic_size]" value="<?php echo esc_attr( $options['button_graphic_size'] ?? '28' ); ?>" min="20" max="44" class="gx-preview-trigger" />
                                 <span class="gx-range-value"><?php echo esc_html( $options['button_graphic_size'] ?? '28' ); ?>px</span>
+                                <p class="description"><?php esc_html_e( 'Used for badge mode. In replace mode, the launcher uses the image’s natural dimensions.', 'gx-text' ); ?></p>
                             </td>
                         </tr>
                     </table>
@@ -71,7 +113,9 @@
                                     <option value="bottom-left" <?php selected( $options['button_position'] ?? '', 'bottom-left' ); ?>><?php esc_html_e( 'Bottom Left', 'gx-text' ); ?></option>
                                     <option value="top-right" <?php selected( $options['button_position'] ?? '', 'top-right' ); ?>><?php esc_html_e( 'Top Right', 'gx-text' ); ?></option>
                                     <option value="top-left" <?php selected( $options['button_position'] ?? '', 'top-left' ); ?>><?php esc_html_e( 'Top Left', 'gx-text' ); ?></option>
+                                    <option value="manual" <?php selected( $options['button_position'] ?? '', 'manual' ); ?>><?php esc_html_e( 'Manual Placement (Shortcode / Block)', 'gx-text' ); ?></option>
                                 </select>
+                                <p class="description"><?php esc_html_e( 'Manual placement hides the floating launcher. Use the GX Text Button block or [gx_text_button] shortcode where you want the launcher to appear.', 'gx-text' ); ?></p>
                             </td>
                         </tr>
                         <tr>
@@ -189,8 +233,13 @@
                         <div class="gx-preview-button" id="gx-preview-btn">
                             <span class="gx-preview-icon"></span>
                             <span class="gx-preview-graphic" hidden><img src="" alt="" /></span>
+                            <span class="gx-preview-graphic-stack" hidden>
+                                <span class="gx-preview-graphic-layer gx-preview-graphic-layer-default"><img src="" alt="" /></span>
+                                <span class="gx-preview-graphic-layer gx-preview-graphic-layer-hover"><img src="" alt="" /></span>
+                            </span>
                             <span class="gx-preview-label"><?php echo esc_html( $options['button_label'] ?? 'Text Us!' ); ?></span>
                         </div>
+                        <p class="gx-preview-manual-note" id="gx-preview-manual-note" hidden><?php esc_html_e( 'Manual placement mode: place the launcher with a shortcode or block.', 'gx-text' ); ?></p>
                     </div>
                 </div>
             </div>

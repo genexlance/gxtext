@@ -18,11 +18,11 @@ class GX_Text_Blocks {
             'editor_script'   => 'gx-text-blocks-editor',
             'render_callback' => array( $this, 'render_button_block' ),
             'attributes'      => array(
-                'label'     => array( 'type' => 'string', 'default' => 'Text Us!' ),
-                'color'     => array( 'type' => 'string', 'default' => '#25D366' ),
-                'textColor' => array( 'type' => 'string', 'default' => '#ffffff' ),
-                'size'      => array( 'type' => 'string', 'default' => 'medium' ),
-                'icon'      => array( 'type' => 'string', 'default' => 'chat' ),
+                'label'     => array( 'type' => 'string', 'default' => '' ),
+                'color'     => array( 'type' => 'string', 'default' => '' ),
+                'textColor' => array( 'type' => 'string', 'default' => '' ),
+                'size'      => array( 'type' => 'string', 'default' => '' ),
+                'icon'      => array( 'type' => 'string', 'default' => '' ),
             ),
         ) );
 
@@ -48,12 +48,46 @@ class GX_Text_Blocks {
     }
 
     public function editor_assets() {
+        $options = class_exists( 'GX_Text_Options' ) ? GX_Text_Options::all() : GX_Text::defaults();
+
         wp_enqueue_script(
             'gx-text-blocks-editor',
             GX_TEXT_PLUGIN_URL . 'blocks/editor.js',
             array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-i18n' ),
             GX_TEXT_VERSION,
             true
+        );
+
+        wp_localize_script(
+            'gx-text-blocks-editor',
+            'gxTextEditor',
+            array(
+                'options' => array(
+                    'buttonColor'       => $options['button_color'] ?? '#25D366',
+                    'buttonTextColor'   => $options['button_text_color'] ?? '#ffffff',
+                    'buttonLabel'       => $options['button_label'] ?? 'Text Us!',
+                    'buttonIcon'        => $options['button_icon'] ?? 'chat',
+                    'buttonSize'        => $options['button_size'] ?? '60',
+                    'buttonRadius'      => $options['button_border_radius'] ?? '50',
+                    'buttonGraphicMode' => $options['button_graphic_mode'] ?? 'badge',
+                    'buttonGraphicUrl'  => $options['button_graphic_url'] ?? '',
+                    'buttonGraphicSize' => $options['button_graphic_size'] ?? '28',
+                    'brandLogoUrl'      => $options['brand_logo_url'] ?? '',
+                    'widgetTitle'       => $options['widget_title'] ?? 'Text Us Now',
+                    'widgetSubtitle'    => $options['widget_subtitle'] ?? 'Send us a message',
+                    'widgetBgColor'     => $options['widget_bg_color'] ?? '#ffffff',
+                    'widgetHeaderColor' => $options['widget_header_color'] ?? '#25D366',
+                    'widgetHeaderText'  => $options['widget_header_text'] ?? '#ffffff',
+                    'widgetFontFamily'  => $options['widget_font_family'] ?? 'inherit',
+                    'placeholderName'   => $options['placeholder_name'] ?? 'Your Name',
+                    'placeholderPhone'  => $options['placeholder_phone'] ?? 'Your Phone Number',
+                    'placeholderMessage'=> $options['placeholder_message'] ?? 'Type your message...',
+                    'subscribeHeading'  => $options['subscribe_heading'] ?? 'Get Deals via Text',
+                    'subscribeDescription' => $options['subscribe_description'] ?? 'Subscribe for exclusive deals!',
+                    'subscribeButtonText'  => $options['subscribe_btn_text'] ?? 'Subscribe',
+                    'subscribeButtonColor' => $options['subscribe_btn_color'] ?? '#FF6B35',
+                ),
+            )
         );
 
         wp_enqueue_style(
@@ -65,15 +99,25 @@ class GX_Text_Blocks {
     }
 
     public function render_button_block( $attributes ) {
-        $shortcode = sprintf(
-            '[gx_text_button label="%s" color="%s" text_color="%s" size="%s" icon="%s"]',
-            esc_attr( $attributes['label'] ),
-            esc_attr( $attributes['color'] ),
-            esc_attr( $attributes['textColor'] ),
-            esc_attr( $attributes['size'] ),
-            esc_attr( $attributes['icon'] )
-        );
-        return do_shortcode( $shortcode );
+        $parts = array();
+
+        if ( ! empty( $attributes['label'] ) ) {
+            $parts[] = 'label="' . esc_attr( $attributes['label'] ) . '"';
+        }
+        if ( ! empty( $attributes['color'] ) ) {
+            $parts[] = 'color="' . esc_attr( $attributes['color'] ) . '"';
+        }
+        if ( ! empty( $attributes['textColor'] ) ) {
+            $parts[] = 'text_color="' . esc_attr( $attributes['textColor'] ) . '"';
+        }
+        if ( ! empty( $attributes['size'] ) ) {
+            $parts[] = 'size="' . esc_attr( $attributes['size'] ) . '"';
+        }
+        if ( ! empty( $attributes['icon'] ) ) {
+            $parts[] = 'icon="' . esc_attr( $attributes['icon'] ) . '"';
+        }
+
+        return do_shortcode( '[gx_text_button ' . implode( ' ', $parts ) . ']' );
     }
 
     public function render_form_block( $attributes ) {
